@@ -44,5 +44,10 @@ const CMDS = [];
 				}
 		});
 
-	client.login(fs.readFileSync(path.join(__dirname, ".token")).toString());
+	client.login(
+		fs
+			.readFileSync(path.join(__dirname, ".token"))
+			.toString()
+			.split("\n")[0]
+	);
 })();
