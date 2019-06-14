@@ -40,7 +40,9 @@ const CMDS = [];
 				for (const cmd of CMDS) {
 					let match = msg.toString().match(new RegExp(CMDPREFIX + cmd.command + "(.*)", "i"));
 
-					if (match) cmd.func(msg, match[1], { CMDPREFIX, CMDS });
+					if (match) {
+						if (!(!msg.channel.nsfw && cmd.nsfw)) cmd.func(msg, match[1], { CMDPREFIX, CMDS });
+					}
 				}
 		});
 

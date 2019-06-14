@@ -6,6 +6,7 @@ const { requestHTML } = require("../util/request");
 module.exports = {
 	command: "lookup",
 	desc: "Lookup stuff from Gelbooru",
+	nsfw: true,
 
 	func: async (msg, txt) => {
 		const BLACKLIST = "scat dead necrophilia loli shota".split(" ");
