@@ -36,6 +36,8 @@ const CMDS = [];
 			else if (msg.guild.id === "586645137736859648") msg.serverType = 1;
 			else return;
 
+			msg.serverTypeTxt = ["yuri", "yaoi"][msg.serverType];
+
 			if (msg.toString().startsWith(CMDPREFIX))
 				for (const cmd of CMDS) {
 					let match = msg.toString().match(new RegExp(CMDPREFIX + cmd.command + "(.*)", "i"));
