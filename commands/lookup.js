@@ -40,7 +40,7 @@ module.exports = {
 				.parent()
 				.prev()
 				.text()
-				.substr(8)}**\n${fileURL}`
+				.substr(8)}**\n${$p("#image, source").attr("src")}`
 		);
 
 		/*
