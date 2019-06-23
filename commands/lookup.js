@@ -5,7 +5,7 @@ const { requestJSON, requestHTML } = require("../util/request");
 
 const SITES = {
 	gelbooru: async (blacklist, tags) => {
-		let url = `https://gelbooru.com/index.php?page=post&s=list&tags=${encodeURIComponent(tags || "")}`;
+		let url = `https://gelbooru.com/index.php?page=post&s=list&tags=${encodeURIComponent(tags || "").trim()}`;
 
 		const $ = await requestHTML(url);
 
@@ -38,7 +38,7 @@ const SITES = {
 	},
 
 	danbooru: async (blacklist, tags) => {
-		let url = `https://danbooru.donmai.us/posts.json?limit=30&tags=${encodeURIComponent(tags || "")}`;
+		let url = `https://danbooru.donmai.us/posts.json?limit=30&tags=${encodeURIComponent(tags || "").trim()}`;
 
 		const json = await requestJSON(url);
 
@@ -59,10 +59,14 @@ module.exports = {
 
 	func: async (msg, txt) => {
 		const BLACKLIST = "scat dead necrophilia loli shota".split(" ");
+		const WHITELIST = "".split(" ");
 
 		if (msg.serverType === 0)
 			BLACKLIST.push(..."yaoi erection penis bara 1boy 2boys multiple_boys male_focus".split(" "));
-		else if (msg.serverType === 1) BLACKLIST.push(..."yuri cleavage breasts 1girl 2girls pussy".split(" "));
+		else if (msg.serverType === 1) {
+			BLACKLIST.push(..."yuri cleavage breasts 1girl 2girls pussy".split(" "));
+			WHITELIST.push(..."yaoi".split(" "));
+		}
 
 		// shuffle array
 		let sitesToTry = Object.keys(SITES)
@@ -73,7 +77,7 @@ module.exports = {
 		let result;
 
 		for (const site of sitesToTry) {
-			result = await SITES[site](BLACKLIST, txt);
+			result = await SITES[site](BLACKLIST, txt + " " + WHITELIST.join(" "));
 
 			if (result) break;
 		}
