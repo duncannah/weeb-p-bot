@@ -45,7 +45,11 @@ const SITES = {
 
 		const post = posts[Math.round(Math.random() * (posts.length - 1))];
 
-		return [post.score, { s: "Safe", q: "Questionable", e: "Explicit" }[post.rating], post.file_url];
+		return [
+			post.score,
+			{ s: "Safe", q: "Questionable", e: "Explicit" }[post.rating],
+			post.file_ext === "zip" ? post.large_file_url : post.file_url
+		];
 	}
 };
 
