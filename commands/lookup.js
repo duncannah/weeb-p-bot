@@ -58,7 +58,7 @@ module.exports = {
 	nsfw: true,
 
 	func: async (msg, txt) => {
-		const BLACKLIST = "scat dead necrophilia loli shota".split(" ");
+		const BLACKLIST = "scat dead necrophilia loli shota real photo".split(" ");
 		const WHITELIST = "".split(" ");
 
 		if (msg.serverType === 0)
