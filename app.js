@@ -32,6 +32,8 @@ const CMDS = [];
 			console.log(`Logged in as ${client.user.tag}.`);
 		})
 		.on("message", (msg) => {
+			if (!msg.guild) return;
+
 			if (msg.guild.id === "586644986649378837") msg.serverType = 0;
 			else if (msg.guild.id === "586645137736859648") msg.serverType = 1;
 			else return;
