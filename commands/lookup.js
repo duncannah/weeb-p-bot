@@ -8,14 +8,14 @@ const SITES = {
 
 		const posts = $(".thumbnail-preview a").filter(
 			(_, el) =>
+				(parseInt(
+					($("img", el)
+						.attr("title")
+						.match(/score:(\d)+ /) || [])[1],
+					10
+				) || -1) >= 0 &&
 				!blacklist.filter(
 					(t) =>
-						(parseInt(
-							($("img", el)
-								.attr("title")
-								.match(/score:(\d)+ /) || [])[1],
-							10
-						) || -1) >= 0 &&
 						$("img", el)
 							.attr("title")
 							.split(" ")
@@ -46,7 +46,7 @@ const SITES = {
 		const json = await requestJSON(url);
 
 		const posts = json.filter(
-			(p) => !blacklist.filter((t) => p.score >= 0 && p.tag_string.split(" ").indexOf(t) !== -1).length
+			(p) => p.score >= 0 && !blacklist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length
 		);
 
 		if (!posts.length) return null;
