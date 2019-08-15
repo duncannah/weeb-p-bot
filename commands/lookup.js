@@ -41,7 +41,9 @@ const SITES = {
 	},
 
 	danbooru: async (blacklist, tags) => {
-		let url = `https://danbooru.donmai.us/posts.json?limit=30&tags=${encodeURIComponent(tags || "").trim()}`;
+		let url = `https://danbooru.donmai.us/posts.json?limit=30&tags=order:random%20${encodeURIComponent(
+			tags || ""
+		).trim()}`;
 
 		const json = await requestJSON(url);
 
