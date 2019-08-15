@@ -87,7 +87,7 @@ module.exports = class LookupCommand extends Commando.Command {
 					key: "tags",
 					label: "tags",
 					prompt: "List of tags to search",
-					type: "message",
+					type: "string",
 					default: ""
 				}
 			]
