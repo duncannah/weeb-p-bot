@@ -9,6 +9,7 @@
 	"dependencies": {
 		"cheerio": "^1.0.0-rc.3",
 		"discord.js": "discordjs/discord.js",
+		"discord.js-commando": "discordjs/Commando",
 		"fast-glob": "^2.2.7",
 		"fs-extra": "^8.0.1",
 		"node-fetch": "^2.6.0"

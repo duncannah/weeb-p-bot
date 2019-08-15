@@ -1,4 +1,7 @@
-const { requestJSON, requestHTML } = require("../util/request");
+const Commando = require("discord.js-commando");
+
+const { requestJSON, requestHTML } = require("../../util/request");
+const { whichGuild } = require("../../util/constants");
 
 const SITES = {
 	gelbooru: async (blacklist, tags) => {
@@ -63,21 +66,47 @@ const SITES = {
 	}
 };
 
-module.exports = {
-	command: "lookup",
-	desc: "Lookup stuff from a couple of sites",
-	nsfw: true,
+module.exports = class LookupCommand extends Commando.Command {
+	constructor(client) {
+		super(client, {
+			name: "lookup",
+			aliases: ["lu"],
+			group: "main",
+			memberName: "lookup",
+			description: "Lookup stuff from a couple of sites",
+			examples: ["lookup animated"],
+			guildOnly: true,
+			nsfw: true,
+			throttling: {
+				duration: 3,
+				usages: 1
+			},
 
-	func: async (msg, txt) => {
+			args: [
+				{
+					key: "tags",
+					label: "tags",
+					prompt: "List of tags to search",
+					type: "message",
+					default: ""
+				}
+			]
+		});
+	}
+
+	async run(msg, { tags }) {
 		const BLACKLIST = "scat dead necrophilia loli shota real photo".split(" ");
 		const WHITELIST = "".split(" ");
 
-		if (msg.serverType === 0)
-			BLACKLIST.push(..."yaoi erection penis bara 1boy 2boys multiple_boys male_focus".split(" "));
-		else if (msg.serverType === 1) {
-			BLACKLIST.push(..."yuri cleavage breasts 1girl 2girls pussy".split(" "));
-			WHITELIST.push(..."yaoi".split(" "));
-		}
+		[
+			() => {
+				BLACKLIST.push(..."yaoi erection penis bara 1boy 2boys multiple_boys male_focus".split(" "));
+			},
+			() => {
+				BLACKLIST.push(..."yuri cleavage breasts 1girl 2girls pussy".split(" "));
+				WHITELIST.push(..."yaoi".split(" "));
+			}
+		][whichGuild(msg.guild.id)]();
 
 		// shuffle array
 		let sitesToTry = Object.keys(SITES)
@@ -88,12 +117,12 @@ module.exports = {
 		let result;
 
 		for (const site of sitesToTry) {
-			result = await SITES[site](BLACKLIST, txt + " " + WHITELIST.join(" "));
+			result = await SITES[site](BLACKLIST, tags + " " + WHITELIST.join(" "));
 
 			if (result) break;
 		}
 
-		if (!result) return msg.reply(`couldn't find anything sweetie :(`);
+		if (!result) return msg.reply(`couldn't find anything...`);
 
 		msg.reply(`Score: **${result[0]}**; Rating: **${result[1]}**\n${result[2]}`);
 	}
