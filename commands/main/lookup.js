@@ -95,7 +95,7 @@ module.exports = class LookupCommand extends Commando.Command {
 	}
 
 	async run(msg, { tags }) {
-		const BLACKLIST = "scat dead necrophilia loli shota real photo".split(" ");
+		const BLACKLIST = "scat dead necrophilia loli shota real photo age_difference".split(" ");
 		const WHITELIST = "".split(" ");
 
 		[
