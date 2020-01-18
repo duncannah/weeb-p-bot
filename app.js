@@ -11,6 +11,15 @@ const { cmdPrefix } = require("./util/constants");
 (async () => {
 	if (!fs.existsSync(path.join(__dirname, ".token"))) return console.error(".token file missing!!");
 
+	console.log(
+		"Running weeb-p-bot version git-" +
+			require("child_process")
+				.execSync("git rev-parse HEAD")
+				.toString()
+				.trim()
+				.substr(0, 7)
+	);
+
 	const client = new Commando.Client({
 		owner: ["206147938085371904", "231560496564666369"],
 		commandPrefix: cmdPrefix
