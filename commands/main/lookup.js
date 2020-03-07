@@ -108,7 +108,7 @@ module.exports = class LookupCommand extends Commando.Command {
 			}
 		][whichGuild(msg.guild.id)]();
 
-		if (msg.channel.name.match(/-gifs$/)) WHITELIST.push(..."animated".split(" "));
+		if (msg.channel.name.match(/-gifs$/) !== null) WHITELIST.push(..."animated".split(" "));
 
 		// shuffle array
 		let sitesToTry = Object.keys(SITES)
