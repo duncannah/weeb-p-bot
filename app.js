@@ -11,14 +11,15 @@ const { cmdPrefix } = require("./util/constants");
 (async () => {
 	if (!fs.existsSync(path.join(__dirname, ".token"))) return console.error(".token file missing!!");
 
-	console.log(
-		"Running weeb-p-bot version git-" +
-			require("child_process")
-				.execSync("git rev-parse HEAD")
-				.toString()
-				.trim()
-				.substr(0, 7)
-	);
+	const botVersion =
+		"git-" +
+		require("child_process")
+			.execSync("git rev-parse HEAD")
+			.toString()
+			.trim()
+			.substr(0, 7);
+
+	console.log("Running weeb-p-bot version " + botVersion);
 
 	const client = new Commando.Client({
 		owner: ["206147938085371904", "231560496564666369"],
@@ -26,6 +27,11 @@ const { cmdPrefix } = require("./util/constants");
 	})
 		.on("ready", () => {
 			console.log(`Logged in as ${client.user.tag}.`);
+
+			client.user.setPresence({
+				activity: { name: "version " + botVersion, type: "WATCHING" },
+				status: "online"
+			});
 		})
 		.on("message", (msg) => {
 			if (!msg.guild) return;
