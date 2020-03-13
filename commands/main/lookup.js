@@ -73,7 +73,7 @@ module.exports = class LookupCommand extends Commando.Command {
 			aliases: ["lu"],
 			group: "main",
 			memberName: "lookup",
-			description: "Lookup stuff from a couple of sites",
+			description: "Lookup stuff from a couple of sites (only on certain channels)",
 			examples: ["lookup animated"],
 			guildOnly: true,
 			nsfw: true,
@@ -95,6 +95,16 @@ module.exports = class LookupCommand extends Commando.Command {
 	}
 
 	async run(msg, { tags }) {
+		const ALLOWEDCHANNELS = [
+			"yaoiposting",
+			"yaoi-gifs",
+			//
+			"yuriposting",
+			"yuri-gifs"
+		];
+
+		if (!ALLOWEDCHANNELS.includes(msg.channel.name)) return;
+
 		const BLACKLIST = "scat dead necrophilia loli shota real photo age_difference".split(" ");
 		const WHITELIST = "".split(" ");
 
