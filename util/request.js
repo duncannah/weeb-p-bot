@@ -1,17 +1,20 @@
 const fetch = require("node-fetch");
 const cheerio = require("cheerio");
+const UserAgent = require("user-agents");
 
 module.exports = {
 	request: async (url, scraping = false) => {
+		const userAgent = new UserAgent();
+
 		const booru = await fetch(url, {
 			headers: {
 				accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-				"user-agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3850.0 Safari/537.36",
+				"user-agent": userAgent.toString(),
 				"accept-language": "en-US,en;q=1.0",
-				"cache-control": "max-age=0"
-			}
+				"cache-control": "max-age=0",
+			},
 		});
+
 		if (!booru.ok) throw Error(`Booru returned ${booru.status}`);
 
 		return booru;
@@ -37,9 +40,9 @@ module.exports = {
 
 			return await cheerio.load(html);
 		} catch (e) {
-			return cheerio();
+			return cheerio.load("");
 		}
 	},
 
-	decodeHTML: (str) => str.replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+	decodeHTML: (str) => str.replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10))),
 };

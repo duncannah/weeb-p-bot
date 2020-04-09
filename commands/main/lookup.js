@@ -17,13 +17,7 @@ const SITES = {
 						.match(/score:(\d)+ /) || [])[1],
 					10
 				) || -1) >= 0 &&
-				!blacklist.filter(
-					(t) =>
-						$("img", el)
-							.attr("title")
-							.split(" ")
-							.indexOf(t) !== -1
-				).length
+				!blacklist.filter((t) => $("img", el).attr("title").split(" ").indexOf(t) !== -1).length
 		);
 
 		if (posts.length <= 0) return null;
@@ -34,12 +28,8 @@ const SITES = {
 
 		return [
 			$p('[id^="psc"]').text(),
-			$p('[id^="psc"]')
-				.parent()
-				.prev()
-				.text()
-				.substr(8),
-			$p("#image, source").attr("src")
+			$p('[id^="psc"]').parent().prev().text().substr(8),
+			$p("meta[property='og:image']").attr("content"),
 		];
 	},
 
@@ -61,9 +51,9 @@ const SITES = {
 		return [
 			post.score,
 			{ s: "Safe", q: "Questionable", e: "Explicit" }[post.rating],
-			post.file_ext === "zip" ? post.large_file_url : post.file_url
+			post.file_ext === "zip" ? post.large_file_url : post.file_url,
 		];
-	}
+	},
 };
 
 module.exports = class LookupCommand extends Commando.Command {
@@ -79,7 +69,7 @@ module.exports = class LookupCommand extends Commando.Command {
 			nsfw: true,
 			throttling: {
 				duration: 3,
-				usages: 1
+				usages: 1,
 			},
 
 			args: [
@@ -88,9 +78,9 @@ module.exports = class LookupCommand extends Commando.Command {
 					label: "tags",
 					prompt: "List of tags to search",
 					type: "string",
-					default: ""
-				}
-			]
+					default: "",
+				},
+			],
 		});
 	}
 
@@ -100,7 +90,7 @@ module.exports = class LookupCommand extends Commando.Command {
 			"yaoi-gifs",
 			//
 			"yuriposting",
-			"yuri-gifs"
+			"yuri-gifs",
 		];
 
 		if (!ALLOWEDCHANNELS.includes(msg.channel.name)) return;
@@ -115,7 +105,7 @@ module.exports = class LookupCommand extends Commando.Command {
 			() => {
 				BLACKLIST.push(..."yuri cleavage breasts 1girl 2girls pussy".split(" "));
 				WHITELIST.push(..."yaoi".split(" "));
-			}
+			},
 		][whichGuild(msg.guild.id)]();
 
 		if (msg.channel.name.match(/-gifs$/) !== null) WHITELIST.push(..."animated".split(" "));
