@@ -3,8 +3,8 @@
 	"version": "1.0.0",
 	"main": "app.js",
 	"repository": "https://github.com/duncannah/weeb-p-bot.git",
-	"author": "Duncan <38371914+duncannah@users.noreply.github.com>",
-	"license": "none",
+	"author": "duncannah",
+	"license": "AGPL-3.0",
 	"private": true,
 	"dependencies": {
 		"cheerio": "^1.0.0-rc.3",
