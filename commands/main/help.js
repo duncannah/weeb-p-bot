@@ -15,9 +15,9 @@ module.exports = class HelpCommand extends Commando.Command {
 			guildOnly: true,
 			nsfw: false,
 			throttling: {
-				duration: 5,
-				usages: 1
-			}
+				duration: 15,
+				usages: 1,
+			},
 		});
 	}
 
@@ -34,6 +34,6 @@ module.exports = class HelpCommand extends Commando.Command {
 			);
 		});
 
-		(await msg.reply(embed)).delete({ timeout: 10000 });
+		(await msg.reply(embed)).delete({ timeout: 15000 });
 	}
 };
