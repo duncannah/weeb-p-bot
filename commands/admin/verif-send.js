@@ -37,6 +37,8 @@ module.exports = class VerifSendCommand extends Commando.Command {
 	}
 
 	async run(msg, args) {
+		msg.delete();
+
 		let verifSettings = msg.guild.settings.get("verificatorMessage");
 
 		if (typeof verifSettings === "object")
@@ -58,7 +60,5 @@ module.exports = class VerifSendCommand extends Commando.Command {
 				verifiedRole: args.verifiedRole.id,
 			});
 		});
-
-		msg.delete();
 	}
 };

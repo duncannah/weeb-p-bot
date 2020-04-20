@@ -35,6 +35,8 @@ module.exports = class VerifEditCommand extends Commando.Command {
 	}
 
 	async run(msg, args) {
+		msg.delete();
+
 		let verifSettings = msg.guild.settings.get("verificatorMessage");
 
 		if (typeof verifSettings !== "object") return msg.reply("No verificator message in this guild");
@@ -52,7 +54,5 @@ module.exports = class VerifEditCommand extends Commando.Command {
 			...verifSettings,
 			verifiedRole: args.verifiedRole.id,
 		});
-
-		msg.delete();
 	}
 };
