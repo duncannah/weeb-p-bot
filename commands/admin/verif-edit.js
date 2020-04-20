@@ -37,7 +37,7 @@ module.exports = class VerifEditCommand extends Commando.Command {
 	async run(msg, args) {
 		let verifSettings = msg.guild.settings.get("verificatorMessage");
 
-		if (!typeof verifSettings === "object") return msg.reply("No verificator message in this guild");
+		if (typeof verifSettings !== "object") return msg.reply("No verificator message in this guild");
 
 		await msg.client.channels.fetch(verifSettings.channelId).then(
 			(channel) =>
