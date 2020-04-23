@@ -95,7 +95,9 @@ module.exports = class LookupCommand extends Commando.Command {
 
 		if (!ALLOWEDCHANNELS.includes(msg.channel.name)) return;
 
-		const BLACKLIST = "scat dead necrophilia loli shota real photo age_difference".split(" ");
+		const BLACKLIST = "scat dead necrophilia loli shota real photo age_difference bestiality beastiality".split(
+			" "
+		);
 		const WHITELIST = "".split(" ");
 
 		[
