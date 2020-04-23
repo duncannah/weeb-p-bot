@@ -5,7 +5,9 @@ const { whichGuild } = require("../../util/constants");
 
 const SITES = {
 	gelbooru: async (blacklist, tags) => {
-		let url = `https://gelbooru.com/index.php?page=post&s=list&tags=${encodeURIComponent(tags || "").trim()}`;
+		let url = `https://gelbooru.com/index.php?page=post&s=list&tags=sort:random%20${encodeURIComponent(
+			tags || ""
+		).trim()}`;
 
 		const $ = await requestHTML(url);
 
