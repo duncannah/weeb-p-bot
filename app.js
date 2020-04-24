@@ -37,6 +37,12 @@ const verifyReactionCollector = require("./reactionCollectors/verify");
 			if (!msg.guild) return;
 		});
 
+	client.on("commandRun", (_, promise, msg) => {
+		msg.channel.startTyping();
+
+		promise.finally(() => msg.channel.stopTyping());
+	});
+
 	client
 		.setProvider(
 			sqlite.open(path.join(__dirname, "settings.sqlite3")).then((db) => new Commando.SQLiteProvider(db))
