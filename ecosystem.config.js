@@ -4,7 +4,7 @@ module.exports = {
 			name: "weeb-p-bot",
 			script: "./app.js",
 			autorestart: true,
-			watch: true,
+			time: true,
 			max_memory_restart: "200M",
 			env: {
 				NODE_ENV: "development",
