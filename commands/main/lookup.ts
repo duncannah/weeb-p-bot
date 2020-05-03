@@ -1,14 +1,14 @@
-const Discord = require("discord.js");
-const Commando = require("discord.js-commando");
+import Discord from "discord.js";
+import Commando from "discord.js-commando";
 
-const { requestJSON, requestHTML } = require("../../util/request");
-const { whichGuild } = require("../../util/constants");
+import { requestJSON, requestHTML } from "../../util/request";
+import { whichGuild } from "../../util/constants";
 
 const SITES = {
 	gelbooru: {
 		name: "Gelbooru",
 		icon: "https://gelbooru.com/favicon.png",
-		look: async (blacklist, tags) => {
+		look: async (blacklist: string[], tags: string) => {
 			let url = `https://gelbooru.com/index.php?page=post&s=list&tags=sort:random%20${encodeURIComponent(
 				tags || ""
 			).trim()}`;
@@ -18,12 +18,12 @@ const SITES = {
 			const posts = $(".thumbnail-preview a").filter(
 				(_, el) =>
 					(parseInt(
-						($("img", el)
-							.attr("title")
+						($("img", el)!
+							.attr("title")!
 							.match(/score:(\d)+ /) || [])[1],
 						10
 					) || -1) >= 0 &&
-					!blacklist.filter((t) => $("img", el).attr("title").split(" ").indexOf(t) !== -1).length
+					!blacklist.filter((t) => $("img", el)!.attr("title")!.split(" ").indexOf(t) !== -1).length
 			);
 
 			if (posts.length <= 0) return null;
@@ -36,12 +36,12 @@ const SITES = {
 			const cleanPostURL = $p("link[rel='canonical']").attr("href");
 
 			return {
-				postID: cleanPostURL.substring(cleanPostURL.lastIndexOf("=") + 1),
+				postID: cleanPostURL!.substring(cleanPostURL!.lastIndexOf("=") + 1),
 				postURL: cleanPostURL,
 				imageURL: imageURL,
 				score: $p('[id^="psc"]').text(),
 				rating: $p('[id^="psc"]').parent().prev().text().substr(8).toLowerCase(),
-				fileExt: imageURL.substring(imageURL.lastIndexOf(".") + 1),
+				fileExt: imageURL!.substring(imageURL!.lastIndexOf(".") + 1),
 				timestamp: $p('[id^="psc"]').parent().prevUntil("h3", "li").last().next().text().substring(8, 27),
 				characters: $p(".tag-type-character a:nth-child(2)")
 					.map((_, e) => $p(e).text().replace("_", " "))
@@ -53,7 +53,7 @@ const SITES = {
 	danbooru: {
 		name: "Danbooru",
 		icon: "https://github.com/Bionus/imgbrd-grabber/raw/gh-pages/assets/img/sources/danbooru.png",
-		look: async (blacklist, tags) => {
+		look: async (blacklist: string[], tags: string) => {
 			let url = `https://danbooru.donmai.us/posts.json?limit=30&tags=order:random%20${encodeURIComponent(
 				tags || ""
 			).trim()}`;
@@ -61,7 +61,7 @@ const SITES = {
 			const json = await requestJSON(url);
 
 			const posts = json.filter(
-				(p) => p.score >= 0 && !blacklist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length
+				(p: any) => p.score >= 0 && !blacklist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length
 			);
 
 			if (!posts.length) return null;
@@ -73,17 +73,18 @@ const SITES = {
 				postURL: "https://danbooru.donmai.us/posts/" + post.id,
 				imageURL: post.file_ext === "zip" ? post.large_file_url : post.file_url,
 				score: post.score,
+				// @ts-ignore
 				rating: { s: "safe", q: "questionable", e: "explicit" }[post.rating],
 				fileExt: post.file_ext,
 				timestamp: post.created_at,
-				characters: (post.tag_string_character || "").split(" ").map((c) => c.replace("_", " ")),
+				characters: (post.tag_string_character || "").split(" ").map((c: string) => c.replace("_", " ")),
 			};
 		},
 	},
 };
 
 module.exports = class LookupCommand extends Commando.Command {
-	constructor(client) {
+	constructor(client: Commando.CommandoClient) {
 		super(client, {
 			name: "lookup",
 			aliases: ["lu"],
@@ -110,7 +111,7 @@ module.exports = class LookupCommand extends Commando.Command {
 		});
 	}
 
-	async run(msg, { tags }) {
+	async run(msg: Commando.CommandoMessage, { tags }: any): Promise<null> {
 		const ALLOWEDCHANNELS = [
 			"yaoiposting",
 			"yaoi-gifs",
@@ -119,7 +120,7 @@ module.exports = class LookupCommand extends Commando.Command {
 			"yuri-gifs",
 		];
 
-		if (!ALLOWEDCHANNELS.includes(msg.channel.name)) return;
+		if (!ALLOWEDCHANNELS.includes((msg.channel as Discord.TextChannel).name)) return null;
 
 		const BLACKLIST = "scat dead necrophilia loli shota real photo age_difference bestiality beastiality".split(
 			" "
@@ -136,7 +137,8 @@ module.exports = class LookupCommand extends Commando.Command {
 			},
 		][whichGuild(msg.guild.id)]();
 
-		if (msg.channel.name.match(/-gifs$/) !== null) WHITELIST.push(..."animated".split(" "));
+		if ((msg.channel as Discord.TextChannel).name.match(/-gifs$/) !== null)
+			WHITELIST.push(..."animated".split(" "));
 
 		// shuffle array
 		let sitesToTry = Object.keys(SITES)
@@ -144,17 +146,18 @@ module.exports = class LookupCommand extends Commando.Command {
 			.sort((a, b) => a.sort - b.sort)
 			.map((a) => a.value);
 
-		let post;
+		let post: any;
 		let booru;
 
 		for (const site of sitesToTry) {
+			// @ts-ignore
 			booru = SITES[site];
 			post = await booru.look(BLACKLIST, tags + " " + WHITELIST.join(" "));
 
 			if (post) break;
 		}
 
-		if (!post) return msg.reply(`couldn't find anything...`);
+		if (!post) return msg.reply(`couldn't find anything...`).then();
 
 		let characters = (post.characters.length
 			? post.characters.length > 4
@@ -177,5 +180,7 @@ module.exports = class LookupCommand extends Commando.Command {
 		await msg
 			.reply({ embed })
 			.then(() => (["webm", "mp4"].includes(post.fileExt) ? msg.channel.send(post.imageURL) : null));
+
+		return null;
 	}
 };

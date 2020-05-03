@@ -1,18 +1,21 @@
-const fs = require("fs-extra");
-const path = require("path");
-const sqlite = require("sqlite");
+import fs from "fs-extra";
+import path from "path";
+import sqlite from "sqlite";
 
-const Commando = require("discord.js-commando");
+import Discord from "discord.js";
+import Commando, { Command } from "discord.js-commando";
 
-const { cmdPrefix } = require("./util/constants");
+import { cmdPrefix } from "./util/constants";
 
-const verifyReactionCollector = require("./reactionCollectors/verify");
+import verifyReactionCollector from "./reactionCollectors/verify";
 
 // YURI: 586644986649378837
 // YAOI: 586645137736859648
 
+require("source-map-support").install();
+
 (async () => {
-	if (!fs.existsSync(path.join(__dirname, ".token"))) return console.error(".token file missing!!");
+	if (!fs.existsSync(path.join(__dirname, "..", ".token"))) return console.error(".token file missing!!");
 
 	const botVersion = "git-" + require("child_process").execSync("git rev-parse HEAD").toString().trim().substr(0, 7);
 
@@ -26,9 +29,9 @@ const verifyReactionCollector = require("./reactionCollectors/verify");
 	})
 		.on("error", console.error)
 		.on("ready", () => {
-			console.log(`Logged in as ${client.user.tag}.`);
+			console.log(`Logged in as ${client!.user!.tag}.`);
 
-			client.user.setPresence({
+			client!.user!.setPresence({
 				activity: { name: "version " + botVersion, type: "WATCHING" },
 				status: "online",
 			});
@@ -45,19 +48,21 @@ const verifyReactionCollector = require("./reactionCollectors/verify");
 
 	client
 		.setProvider(
-			sqlite.open(path.join(__dirname, "settings.sqlite3")).then((db) => new Commando.SQLiteProvider(db))
+			sqlite.open(path.join(__dirname, "..", "settings.sqlite3")).then((db) => new Commando.SQLiteProvider(db))
 		)
 		.then(() => {
-			client.guilds.valueOf().forEach((guild) => {
-				let verifSettings = guild.settings.get("verificatorMessage");
+			client.guilds.cache.forEach((guild) => {
+				let verifSettings = client.provider.get(guild, "verificatorMessage");
 
 				if (typeof verifSettings === "object") {
 					client.channels.fetch(verifSettings.channelId).then(
 						(channel) =>
-							channel.messages.fetch(verifSettings.id).then(
-								(msg) => verifyReactionCollector(msg),
-								() => console.error("Can't find the verificator message")
-							),
+							channel instanceof Discord.TextChannel
+								? channel.messages.fetch(verifSettings.id).then(
+										(msg) => verifyReactionCollector(msg),
+										() => console.error("Can't find the verificator message")
+								  )
+								: null,
 						() => console.error("Can't find the channel for this verificator message")
 					);
 				}
@@ -68,8 +73,8 @@ const verifyReactionCollector = require("./reactionCollectors/verify");
 	client.registry
 		.registerDefaultTypes()
 		.registerGroups([["main", "Main commands"]])
-		.registerGroups([["admin", "Admin commands", true]])
+		.registerGroups([["admin", "Admin commands"]])
 		.registerCommandsIn(path.join(__dirname, "commands"));
 
-	client.login(fs.readFileSync(path.join(__dirname, ".token")).toString().split("\n")[0]);
+	client.login(fs.readFileSync(path.join(__dirname, "..", ".token")).toString().split("\n")[0]);
 })();

@@ -1,10 +1,10 @@
-const Discord = require("discord.js");
-const Commando = require("discord.js-commando");
+import Discord from "discord.js";
+import Commando from "discord.js-commando";
 
-const { botName, cmdPrefix, verificatorDefaultMessage } = require("../../util/constants");
+import { verificatorDefaultMessage } from "../../util/constants";
 
 module.exports = class VerifEditCommand extends Commando.Command {
-	constructor(client) {
+	constructor(client: Commando.CommandoClient) {
 		super(client, {
 			name: "verif-edit",
 			group: "admin",
@@ -19,7 +19,7 @@ module.exports = class VerifEditCommand extends Commando.Command {
 					key: "verifiedRole",
 					prompt: "Verified role?",
 					type: "role",
-					default: (msg, client) =>
+					default: (msg: Commando.CommandoMessage, client: Commando.Client) =>
 						new (require("discord.js-commando/src/types/role"))(client).parse("Verified", msg),
 				},
 
@@ -34,19 +34,21 @@ module.exports = class VerifEditCommand extends Commando.Command {
 		});
 	}
 
-	async run(msg, args) {
+	async run(msg: Commando.CommandoMessage, args: any): Promise<null> {
 		msg.delete();
 
 		let verifSettings = msg.guild.settings.get("verificatorMessage");
 
-		if (typeof verifSettings !== "object") return msg.reply("No verificator message in this guild");
+		if (typeof verifSettings !== "object") return msg.reply("No verificator message in this guild").then();
 
 		await msg.client.channels.fetch(verifSettings.channelId).then(
 			(channel) =>
-				channel.messages.fetch(verifSettings.id).then(
-					(msg) => msg.edit(args.message),
-					() => msg.reply("Can't find the verificator message")
-				),
+				channel instanceof Discord.TextChannel
+					? channel.messages.fetch(verifSettings.id).then(
+							(msg) => msg.edit(args.message),
+							() => msg.reply("Can't find the verificator message")
+					  )
+					: null,
 			() => msg.reply("Can't find the channel for this verificator message")
 		);
 
@@ -54,5 +56,7 @@ module.exports = class VerifEditCommand extends Commando.Command {
 			...verifSettings,
 			verifiedRole: args.verifiedRole.id,
 		});
+
+		return null;
 	}
 };

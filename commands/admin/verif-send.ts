@@ -1,12 +1,12 @@
-const Discord = require("discord.js");
-const Commando = require("discord.js-commando");
+import Discord from "discord.js";
+import Commando, { Command } from "discord.js-commando";
 
-const { botName, cmdPrefix, verificatorDefaultMessage } = require("../../util/constants");
+import { verificatorDefaultMessage } from "../../util/constants";
 
-const verifyReactionCollector = require("../../reactionCollectors/verify");
+import verifyReactionCollector from "../../reactionCollectors/verify";
 
 module.exports = class VerifSendCommand extends Commando.Command {
-	constructor(client) {
+	constructor(client: Commando.CommandoClient) {
 		super(client, {
 			name: "verif-send",
 			group: "admin",
@@ -21,7 +21,7 @@ module.exports = class VerifSendCommand extends Commando.Command {
 					key: "verifiedRole",
 					prompt: "Verified role?",
 					type: "role",
-					default: (msg, client) =>
+					default: (msg: Commando.CommandoMessage, client: Commando.Client) =>
 						new (require("discord.js-commando/src/types/role"))(client).parse("Verified", msg),
 				},
 
@@ -36,7 +36,7 @@ module.exports = class VerifSendCommand extends Commando.Command {
 		});
 	}
 
-	async run(msg, args) {
+	async run(msg: Commando.CommandoMessage, args: any): Promise<null> {
 		msg.delete();
 
 		let verifSettings = msg.guild.settings.get("verificatorMessage");
@@ -44,21 +44,26 @@ module.exports = class VerifSendCommand extends Commando.Command {
 		if (typeof verifSettings === "object")
 			await msg.client.channels.fetch(verifSettings.channelId).then(
 				(channel) =>
-					channel.messages.fetch(verifSettings.id).then(
-						(msg) => msg.delete(),
-						() => {}
-					),
+					channel instanceof Discord.TextChannel
+						? channel.messages.fetch(verifSettings.id).then(
+								(msg) => msg.delete(),
+								() => {}
+						  )
+						: null,
 				() => {}
 			);
 
 		msg.channel.send(args.message).then((message) => {
 			message.react("\u2705").then(() => verifyReactionCollector(message));
 
-			message.guild.settings.set("verificatorMessage", {
-				channelId: message.channel.id,
-				id: message.id,
-				verifiedRole: args.verifiedRole.id,
-			});
+			if (message.guild)
+				msg.client.provider.set(message.guild, "verificatorMessage", {
+					channelId: message.channel.id,
+					id: message.id,
+					verifiedRole: args.verifiedRole.id,
+				});
 		});
+
+		return null;
 	}
 };

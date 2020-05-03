@@ -1,10 +1,10 @@
-const Discord = require("discord.js");
-const Commando = require("discord.js-commando");
+import Discord from "discord.js";
+import Commando from "discord.js-commando";
 
-const { botName, cmdPrefix } = require("../../util/constants");
+import { botName, cmdPrefix } from "../../util/constants";
 
 module.exports = class HelpCommand extends Commando.Command {
-	constructor(client) {
+	constructor(client: Commando.CommandoClient) {
 		super(client, {
 			name: "help",
 			aliases: ["h"],
@@ -30,13 +30,13 @@ module.exports = class HelpCommand extends Commando.Command {
 		});
 	}
 
-	async run(msg, args) {
+	async run(msg: Commando.CommandoMessage, args: any): Promise<null> {
 		let embed = new Discord.MessageEmbed()
 			.setColor("#a442f4")
-			.setAuthor(botName, msg.client.user.displayAvatarURL());
+			.setAuthor(botName, msg!.client!.user!.displayAvatarURL());
 
 		if (args.group && !this.client.registry.groups.some((g) => g.id === args.group))
-			return msg.reply("Command group not found.");
+			return msg.reply("Command group not found.").then();
 
 		this.client.registry.groups.forEach((group) => {
 			if (
@@ -59,6 +59,8 @@ module.exports = class HelpCommand extends Commando.Command {
 			});
 		});
 
-		(await msg.reply(embed)).delete({ timeout: 15000 });
+		msg.reply(embed).then((msg) => (msg instanceof Discord.Message ? msg.delete({ timeout: 15000 }) : null));
+
+		return null;
 	}
 };
