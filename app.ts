@@ -40,10 +40,10 @@ require("source-map-support").install();
 			if (!msg.guild) return;
 		});
 
-	client.on("commandRun", (_, promise, msg) => {
+	client.on("commandRun", (_, prom, msg) => {
 		msg.channel.startTyping();
 
-		promise.finally(() => msg.channel.stopTyping());
+		Promise.race([prom, new Promise((r) => setTimeout(r, 1000 * 5))]).finally(() => msg.channel.stopTyping());
 	});
 
 	client
