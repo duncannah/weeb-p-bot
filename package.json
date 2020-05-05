@@ -1,7 +1,7 @@
 {
 	"name": "weeb-p-bot",
 	"version": "1.0.0",
-	"main": "app.js",
+	"main": "./build/app.js",
 	"repository": "https://github.com/duncannah/weeb-p-bot.git",
 	"author": "duncannah",
 	"license": "AGPL-3.0",

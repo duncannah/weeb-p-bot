@@ -2,7 +2,7 @@ module.exports = {
 	apps: [
 		{
 			name: "weeb-p-bot",
-			script: "./app.js",
+			script: ".",
 			autorestart: true,
 			time: true,
 			max_memory_restart: "200M",
