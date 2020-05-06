@@ -7,16 +7,15 @@
 	"license": "AGPL-3.0",
 	"private": true,
 	"dependencies": {
+		"axios": "^0.19.2",
 		"cheerio": "^1.0.0-rc.3",
 		"discord.js": "discordjs/discord.js",
 		"discord.js-commando": "discordjs/Commando",
 		"fast-glob": "^3.2.2",
 		"fs-extra": "^9.0.0",
-		"node-fetch": "^2.6.0",
 		"source-map-support": "^0.5.19",
 		"sqlite": "^3.0.0",
-		"typescript": "^3.8.3",
-		"user-agents": "^1.0.559"
+		"typescript": "^3.8.3"
 	},
 	"scripts": {
 		"build": "tsc",
@@ -25,8 +24,6 @@
 	"devDependencies": {
 		"@types/cheerio": "^0.22.18",
 		"@types/fs-extra": "^8.1.0",
-		"@types/node-fetch": "^2.5.7",
-		"@types/user-agents": "^1.0.0",
 		"@types/ws": "^7.2.4"
 	}
 }

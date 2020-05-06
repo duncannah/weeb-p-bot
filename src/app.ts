@@ -1,11 +1,12 @@
 import fs from "fs-extra";
 import path from "path";
 import sqlite from "sqlite";
+import fg from "fast-glob";
 
 import Discord from "discord.js";
 import Commando, { Command } from "discord.js-commando";
 
-import { cmdPrefix } from "./util/constants";
+import { cmdPrefix, Task } from "./util/constants";
 
 import verifyReactionCollector from "./reactionCollectors/verify";
 
@@ -66,6 +67,66 @@ require("source-map-support").install();
 						() => console.error("Can't find the channel for this verificator message")
 					);
 				}
+			});
+
+			fg(path.join(__dirname, "tasks/*.js")).then(async (files) => {
+				let tasks = client.settings.get("tasks", {});
+
+				for (const file of files) {
+					// await to prevent race
+					await import(file).then((module: { default: Task }) => {
+						const task = module.default;
+
+						let runFunc = () => {
+							console.log("[INFO] Running task " + task.name);
+							let start = new Date().getTime();
+
+							let prom = task.func(client).then(
+								() =>
+									console.log(
+										`[INFO] Task ${task.name} completed and took ${
+											(new Date().getTime() - start) / 1000
+										}s.`
+									),
+								(err) =>
+									console.error(
+										`[ERROR] Task ${task.name} failed after ${
+											(new Date().getTime() - start) / 1000
+										}s.`,
+										err
+									)
+							);
+
+							return prom;
+						};
+
+						let updateFunc = () => {
+							client.settings.set("tasks", {
+								...client.settings.get("tasks", {}),
+								[task.name]: new Date().getTime() + task.frequency,
+							});
+
+							setTimeout(() => runFunc().finally(updateFunc), task.frequency);
+						};
+
+						// if task has been run before
+						if (tasks[task.name] && !isNaN(tasks[task.name])) {
+							// if time has already passed
+							if (tasks[task.name] < new Date().getTime()) runFunc().finally(updateFunc);
+							else
+								setTimeout(
+									() => runFunc().finally(updateFunc),
+									parseInt(tasks[task.name], 10) - new Date().getTime()
+								);
+						} else {
+							tasks[task.name] = new Date().getTime() + task.frequency;
+
+							runFunc().finally(updateFunc);
+						}
+					});
+				}
+
+				client.settings.set("tasks", tasks);
 			});
 		})
 		.catch(console.error);

@@ -2,21 +2,21 @@ import Discord from "discord.js";
 import Commando from "discord.js-commando";
 
 import { requestJSON, requestHTML } from "../../util/request";
-import { whichGuild } from "../../util/constants";
+import { whichGuild, fallbackUserAgent } from "../../util/constants";
 
 const SITES = {
 	gelbooru: {
 		name: "Gelbooru",
 		icon: "https://gelbooru.com/favicon.png",
-		look: async (blacklist: string[], tags: string) => {
+		look: async (blacklist: string[], tags: string, userAgent: string) => {
 			let url = `https://gelbooru.com/index.php?page=post&s=list&tags=sort:random%20${encodeURIComponent(
 				tags || ""
 			).trim()}`;
 
-			const $ = await requestHTML(url);
+			const $ = await requestHTML(url, userAgent);
 
 			const posts = $(".thumbnail-preview a").filter(
-				(_, el) =>
+				(_: any, el: any) =>
 					(parseInt(
 						($("img", el)!
 							.attr("title")!
@@ -30,7 +30,7 @@ const SITES = {
 
 			const postURL = "https:" + posts.eq(Math.round(Math.random() * (posts.length - 1))).attr("href");
 
-			const $p = await requestHTML(postURL);
+			const $p = await requestHTML(postURL, userAgent);
 
 			const imageURL = $p("meta[property='og:image']").attr("content");
 			const cleanPostURL = $p("link[rel='canonical']").attr("href");
@@ -44,7 +44,7 @@ const SITES = {
 				fileExt: imageURL!.substring(imageURL!.lastIndexOf(".") + 1),
 				timestamp: $p('[id^="psc"]').parent().prevUntil("h3", "li").last().next().text().substring(8, 27),
 				characters: $p(".tag-type-character a:nth-child(2)")
-					.map((_, e) => $p(e).text().replace("_", " "))
+					.map((_: any, e: any) => $p(e).text().replace("_", " "))
 					.get(),
 			};
 		},
@@ -53,12 +53,12 @@ const SITES = {
 	danbooru: {
 		name: "Danbooru",
 		icon: "https://github.com/Bionus/imgbrd-grabber/raw/gh-pages/assets/img/sources/danbooru.png",
-		look: async (blacklist: string[], tags: string) => {
+		look: async (blacklist: string[], tags: string, userAgent: string) => {
 			let url = `https://danbooru.donmai.us/posts.json?limit=30&tags=order:random%20${encodeURIComponent(
 				tags || ""
 			).trim()}`;
 
-			const json = await requestJSON(url);
+			const json = await requestJSON(url, userAgent);
 
 			const posts = json.filter(
 				(p: any) => p.score >= 0 && !blacklist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length
@@ -152,7 +152,11 @@ module.exports = class LookupCommand extends Commando.Command {
 		for (const site of sitesToTry) {
 			// @ts-ignore
 			booru = SITES[site];
-			post = await booru.look(BLACKLIST, tags + " " + WHITELIST.join(" "));
+			post = await booru.look(
+				BLACKLIST,
+				tags + " " + WHITELIST.join(" "),
+				msg.client.settings.get("userAgent", fallbackUserAgent)
+			);
 
 			if (post) break;
 		}
