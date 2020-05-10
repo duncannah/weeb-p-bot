@@ -2,18 +2,20 @@ import axios from "axios";
 import cheerio from "cheerio";
 
 export const request = async (url: string, userAgent: string) => {
-	const booru = await axios
-		.get(url, {
-			headers: {
-				accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-				"user-agent": userAgent.toString(),
-				"accept-language": "en-US,en;q=1.0",
-				"cache-control": "max-age=0",
-			},
-		})
-		.catch((err) => {
-			throw new Error(`Booru returned ${booru.status}`);
-		});
+	const booru = await axios({
+		url: url,
+		headers: {
+			Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+			"User-Agent": userAgent.toString(),
+			"Accept-Encoding": "gzip, deflate, br",
+			"Accept-Language": "en-US,en;q=1.0",
+			Pragma: "no-cache",
+			"Cache-Control": "max-age=0",
+		},
+		timeout: 1000 * 10,
+	}).catch((err) => {
+		throw new Error(`Booru returned ${booru.status}`);
+	});
 
 	return booru;
 };
