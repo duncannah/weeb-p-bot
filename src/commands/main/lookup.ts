@@ -122,7 +122,7 @@ module.exports = class LookupCommand extends Commando.Command {
 
 		if (!ALLOWEDCHANNELS.includes((msg.channel as Discord.TextChannel).name)) return null;
 
-		const BLACKLIST = "scat dead necrophilia loli shota real photo age_difference bestiality beastiality bug bugs pregnant birth vore watersports urine piss pee".split(
+		const BLACKLIST = "scat dead necrophilia loli shota real photo age_difference bestiality beastiality bug bugs pregnant birth vore watersports urine piss pee boku_no_pico".split(
 			" "
 		);
 		const WHITELIST = "".split(" ");
