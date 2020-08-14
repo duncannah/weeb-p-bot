@@ -52,19 +52,32 @@ require("source-map-support").install();
 			sqlite.open(path.join(__dirname, "..", "settings.sqlite3")).then((db) => new Commando.SQLiteProvider(db))
 		)
 		.then(() => {
-			client.guilds.cache.forEach((guild) => {
-				let verifSettings = client.provider.get(guild, "verificatorMessage");
+			client.guilds.cache.forEach(async (guild) => {
+				// TODO: make settings a type or whatever
 
-				if (typeof verifSettings === "object") {
-					client.channels.fetch(verifSettings.channelId).then(
-						(channel) =>
-							channel instanceof Discord.TextChannel
-								? channel.messages.fetch(verifSettings.id).then(
-										(msg) => verifyReactionCollector(msg),
-										() => console.error("Can't find the verificator message")
-								  )
-								: null,
-						() => console.error("Can't find the channel for this verificator message")
+				// upgrade
+				let oldVerifSettings = client.provider.get(guild, "verificatorMessage");
+
+				if (typeof oldVerifSettings === "object") {
+					await client.provider.set(guild, "verificatorMessages", [{ ...oldVerifSettings }]);
+					await client.provider.remove(guild, "verificatorMessage");
+					console.log("Upgraded verificator message settings for " + guild.name);
+				}
+
+				let verifSettings = client.provider.get(guild, "verificatorMessages", []);
+
+				if (verifSettings instanceof Array) {
+					verifSettings.forEach((verifSetting: any) =>
+						client.channels.fetch(verifSetting.channelId).then(
+							(channel) =>
+								channel instanceof Discord.TextChannel
+									? channel.messages.fetch(verifSetting.id).then(
+											(msg) => verifyReactionCollector(msg),
+											() => console.error("Can't find the verificator message")
+									  )
+									: null,
+							() => console.error("Can't find the channel for this verificator message")
+						)
 					);
 				}
 			});

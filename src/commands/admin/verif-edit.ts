@@ -16,6 +16,12 @@ module.exports = class VerifEditCommand extends Commando.Command {
 
 			args: [
 				{
+					key: "verificatorID",
+					prompt: "ID of verificator?",
+					type: "integer",
+				},
+
+				{
 					key: "verifiedRole",
 					prompt: "Verified role?",
 					type: "role",
@@ -37,9 +43,14 @@ module.exports = class VerifEditCommand extends Commando.Command {
 	async run(msg: Commando.CommandoMessage, args: any): Promise<null> {
 		msg.delete();
 
-		let verifSettings = msg.guild.settings.get("verificatorMessage");
+		let verificators = msg.guild.settings.get("verificatorMessages");
 
-		if (typeof verifSettings !== "object") return msg.reply("No verificator message in this guild").then();
+		if (!(verificators instanceof Array)) return msg.reply("No verificator messages in this guild").then();
+
+		let verifSettings: any = verificators.find((verifSettings: any) => verifSettings.id == args.verificatorID);
+
+		if (typeof verifSettings !== "object" || verifSettings === null)
+			return msg.reply("Can't find message with ID").then();
 
 		await msg.client.channels.fetch(verifSettings.channelId).then(
 			(channel) =>
@@ -52,10 +63,12 @@ module.exports = class VerifEditCommand extends Commando.Command {
 			() => msg.reply("Can't find the channel for this verificator message")
 		);
 
-		msg.guild.settings.set("verificatorMessage", {
+		verificators[verificators.findIndex((verificator: any) => verificator.id === args.verificatorID)] = {
 			...verifSettings,
 			verifiedRole: args.verifiedRole.id,
-		});
+		};
+
+		msg.guild.settings.set("verificatorMessages", verificators);
 
 		return null;
 	}

@@ -9,9 +9,14 @@ export default function (message: Discord.Message): void {
 			? message.client!.user!.id !== user.id
 				? message
 						.guild!.members.fetch(user)
-						.then((member) =>
-							member.roles.add(message.guild.settings.get("verificatorMessage").verifiedRole)
-						)
+						.then((member) => {
+							let verificator = message.guild.settings
+								.get("verificatorMessages")
+								.find((verificator: any) => verificator.id === message.id);
+
+							if (verificator) member.roles.add(verificator.verifiedRole);
+							else throw new Error("Verificator not found");
+						})
 						.catch((err) => console.error(err))
 				: null
 			: console.error(new Error(), message);

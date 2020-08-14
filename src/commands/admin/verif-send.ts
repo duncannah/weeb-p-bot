@@ -39,6 +39,7 @@ module.exports = class VerifSendCommand extends Commando.Command {
 	async run(msg: Commando.CommandoMessage, args: any): Promise<null> {
 		msg.delete();
 
+		/*
 		let verifSettings = msg.guild.settings.get("verificatorMessage");
 
 		if (typeof verifSettings === "object")
@@ -52,16 +53,20 @@ module.exports = class VerifSendCommand extends Commando.Command {
 						: null,
 				() => {}
 			);
+		*/
 
 		msg.channel.send(args.message).then((message) => {
-			message.react("\u2705").then(() => verifyReactionCollector(message));
-
 			if (message.guild)
-				msg.client.provider.set(message.guild, "verificatorMessage", {
-					channelId: message.channel.id,
-					id: message.id,
-					verifiedRole: args.verifiedRole.id,
-				});
+				msg.client.provider
+					.set(message.guild, "verificatorMessages", [
+						...msg.client.provider.get(message.guild, "verificatorMessages", []),
+						{
+							channelId: message.channel.id,
+							id: message.id,
+							verifiedRole: args.verifiedRole.id,
+						},
+					])
+					.then(() => message.react("\u2705").then(() => verifyReactionCollector(message)));
 		});
 
 		return null;
