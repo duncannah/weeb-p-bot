@@ -4,27 +4,32 @@ import Commando from "discord.js-commando";
 import { requestJSON, requestHTML } from "../../util/request";
 import { whichGuild, fallbackUserAgent } from "../../util/constants";
 
+// TODO: special rules per guild
+
 const SITES = {
 	gelbooru: {
 		name: "Gelbooru",
 		icon: "https://gelbooru.com/favicon.png",
-		look: async (blacklist: string[], tags: string, userAgent: string) => {
+		look: async (blacklist: string[], whitelist: string[], tags: string, userAgent: string) => {
 			let url = `https://gelbooru.com/index.php?page=post&s=list&tags=sort:random%20${encodeURIComponent(
 				tags || ""
 			).trim()}`;
 
 			const $ = await requestHTML(url, userAgent);
 
-			const posts = $(".thumbnail-preview a").filter(
-				(_: any, el: any) =>
+			const posts = $(".thumbnail-preview a").filter((_: any, el: any) => 
+				(
 					(parseInt(
 						($("img", el)!
 							.attr("title")!
 							.match(/score:(\d)+ /) || [])[1],
 						10
 					) || -1) >= 0 &&
+					(whitelist.length ?
+						!!whitelist.filter((t) => $("img", el)!.attr("title")!.split(" ").indexOf(t) !== -1).length : true) &&
 					!blacklist.filter((t) => $("img", el)!.attr("title")!.split(" ").indexOf(t) !== -1).length
-			);
+				)
+		);
 
 			if (posts.length <= 0) return null;
 
@@ -53,7 +58,7 @@ const SITES = {
 	danbooru: {
 		name: "Danbooru",
 		icon: "https://github.com/Bionus/imgbrd-grabber/raw/gh-pages/assets/img/sources/danbooru.png",
-		look: async (blacklist: string[], tags: string, userAgent: string) => {
+		look: async (blacklist: string[], whitelist: string[], tags: string, userAgent: string) => {
 			let url = `https://danbooru.donmai.us/posts.json?limit=30&tags=order:random%20${encodeURIComponent(
 				tags || ""
 			).trim()}`;
@@ -61,7 +66,12 @@ const SITES = {
 			const json = await requestJSON(url, userAgent);
 
 			const posts = json.filter(
-				(p: any) => p.score >= 0 && !blacklist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length
+				(p: any) =>
+					p.score >= 0 &&
+					p.rating !== "s" &&
+					(whitelist.length ?
+						!!whitelist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length : true) &&
+					!blacklist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length
 			);
 
 			if (!posts.length) return null;
@@ -122,29 +132,35 @@ module.exports = class LookupCommand extends Commando.Command {
 
 		if (!ALLOWEDCHANNELS.includes((msg.channel as Discord.TextChannel).name)) return null;
 
-		const BLACKLIST = "scat dead necrophilia loli shota real photo age_difference bestiality beastiality bug bugs pregnant birth vore watersports urine piss pee boku_no_pico creepy body_horror suicide".split(
+		const BLACKLIST = "rating:safe scat dead death necrophilia loli shota real photo age_difference bestiality beastiality bug bugs pregnant birth vore watersports urine piss pee boku_no_pico creepy body_horror suicide".split(
 			" "
 		);
-		const WHITELIST = "".split(" ");
+		const WHITELIST: string[] = [];
 
 		[
 			() => {
-				BLACKLIST.push(..."yaoi erection penis bara 1boy 2boys multiple_boys male_focus".split(" "));
+				BLACKLIST.push(
+					..."yaoi erection penis bara 1boy 2boys 3boys 4boys 5boys 6+boys multiple_boys male_focus".split(
+						" "
+					)
+				);
 			},
 			() => {
 				BLACKLIST.push(..."yuri cleavage breasts 1girl 2girls 3girls 4girls 5girls 6+girls pussy".split(" "));
-				WHITELIST.push(..."male".split(" "));
+				WHITELIST.push(..."1boy 2boys 3boys 4boys 5boys 6+boys yaoi".split(" "));
 			},
 		][whichGuild(msg.guild.id)]();
 
-		if ((msg.channel as Discord.TextChannel).name.match(/-gifs$/) !== null)
-			WHITELIST.push(..."animated".split(" "));
+		if ((msg.channel as Discord.TextChannel).name.match(/-gifs$/) !== null) tags += " animated";
 
 		// shuffle array
 		let sitesToTry = Object.keys(SITES)
 			.map((a) => ({ sort: Math.random(), value: a }))
 			.sort((a, b) => a.sort - b.sort)
 			.map((a) => a.value);
+
+		// try 3 times
+		sitesToTry = [...sitesToTry, ...sitesToTry, ...sitesToTry];
 
 		let post: any;
 		let booru;
@@ -154,7 +170,8 @@ module.exports = class LookupCommand extends Commando.Command {
 			booru = SITES[site];
 			post = await booru.look(
 				BLACKLIST,
-				tags + " " + WHITELIST.join(" "),
+				WHITELIST,
+				tags,
 				msg.client.settings.get("userAgent", fallbackUserAgent)
 			);
 
