@@ -132,8 +132,8 @@ module.exports = class LookupCommand extends Commando.Command {
 				BLACKLIST.push(..."yaoi erection penis bara 1boy 2boys multiple_boys male_focus".split(" "));
 			},
 			() => {
-				BLACKLIST.push(..."yuri cleavage breasts 1girl 2girls pussy".split(" "));
-				WHITELIST.push(..."yaoi".split(" "));
+				BLACKLIST.push(..."yuri cleavage breasts 1girl 2girls 3girls 4girls 5girls 6+girls pussy".split(" "));
+				WHITELIST.push(..."male".split(" "));
 			},
 		][whichGuild(msg.guild.id)]();
 
