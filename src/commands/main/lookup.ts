@@ -17,19 +17,19 @@ const SITES = {
 
 			const $ = await requestHTML(url, userAgent);
 
-			const posts = $(".thumbnail-preview a").filter((_: any, el: any) => 
-				(
+			const posts = $(".thumbnail-preview a").filter(
+				(_: any, el: any) =>
 					(parseInt(
 						($("img", el)!
 							.attr("title")!
 							.match(/score:(\d)+ /) || [])[1],
 						10
 					) || -1) >= 0 &&
-					(whitelist.length ?
-						!!whitelist.filter((t) => $("img", el)!.attr("title")!.split(" ").indexOf(t) !== -1).length : true) &&
+					(whitelist.length
+						? !!whitelist.filter((t) => $("img", el)!.attr("title")!.split(" ").indexOf(t) !== -1).length
+						: true) &&
 					!blacklist.filter((t) => $("img", el)!.attr("title")!.split(" ").indexOf(t) !== -1).length
-				)
-		);
+			);
 
 			if (posts.length <= 0) return null;
 
@@ -69,8 +69,9 @@ const SITES = {
 				(p: any) =>
 					p.score >= 0 &&
 					p.rating !== "s" &&
-					(whitelist.length ?
-						!!whitelist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length : true) &&
+					(whitelist.length
+						? !!whitelist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length
+						: true) &&
 					!blacklist.filter((t) => p.tag_string.split(" ").indexOf(t) !== -1).length
 			);
 
@@ -128,6 +129,7 @@ module.exports = class LookupCommand extends Commando.Command {
 			//
 			"yuriposting",
 			"yuri-gifs",
+			"futa",
 		];
 
 		if (!ALLOWEDCHANNELS.includes((msg.channel as Discord.TextChannel).name)) return null;
@@ -146,12 +148,16 @@ module.exports = class LookupCommand extends Commando.Command {
 				);
 			},
 			() => {
-				BLACKLIST.push(..."yuri cleavage breasts 1girl 2girls 3girls 4girls 5girls 6+girls pussy".split(" "));
+				BLACKLIST.push(
+					..."yuri cleavage breasts 1girl 2girls 3girls 4girls 5girls 6+girls pussy futa futanari".split(" ")
+				);
 				WHITELIST.push(..."1boy 2boys 3boys 4boys 5boys 6+boys yaoi".split(" "));
 			},
 		][whichGuild(msg.guild.id)]();
 
 		if ((msg.channel as Discord.TextChannel).name.match(/-gifs$/) !== null) tags += " animated";
+
+		if ((msg.channel as Discord.TextChannel).name.match(/futa/) !== null) tags += " futanari";
 
 		// shuffle array
 		let sitesToTry = Object.keys(SITES)
