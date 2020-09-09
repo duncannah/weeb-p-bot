@@ -158,6 +158,7 @@ module.exports = class LookupCommand extends Commando.Command {
 		if ((msg.channel as Discord.TextChannel).name.match(/-gifs$/) !== null) tags += " animated";
 
 		if ((msg.channel as Discord.TextChannel).name.match(/futa/) !== null) tags += " futanari";
+		else BLACKLIST.push(..."futa futanari futa_with_female".split(" "));
 
 		// shuffle array
 		let sitesToTry = Object.keys(SITES)
