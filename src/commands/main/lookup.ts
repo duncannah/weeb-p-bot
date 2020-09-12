@@ -122,7 +122,7 @@ module.exports = class LookupCommand extends Commando.Command {
 		});
 	}
 
-	async run(msg: Commando.CommandoMessage, { tags }: any): Promise<null> {
+	async run(msg: Commando.CommandoMessage, { tags, automated }: any): Promise<null> {
 		const ALLOWEDCHANNELS = [
 			"yaoiposting",
 			"yaoi-gifs",
@@ -132,7 +132,7 @@ module.exports = class LookupCommand extends Commando.Command {
 			"futa",
 		];
 
-		if (!ALLOWEDCHANNELS.includes((msg.channel as Discord.TextChannel).name)) return null;
+		if (!automated && !ALLOWEDCHANNELS.includes((msg.channel as Discord.TextChannel).name)) return null;
 
 		const BLACKLIST = "rating:safe scat dead death necrophilia loli shota real photo age_difference bestiality beastiality bug bugs pregnant birth vore watersports urine piss pee boku_no_pico creepy body_horror suicide".split(
 			" "
@@ -185,7 +185,7 @@ module.exports = class LookupCommand extends Commando.Command {
 			if (post) break;
 		}
 
-		if (!post) return msg.reply(`couldn't find anything...`).then();
+		if (!post) return !automated ? msg.reply(`couldn't find anything...`).then() : null;
 
 		let characters = (post.characters.length
 			? post.characters.length > 4
