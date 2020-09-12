@@ -91,16 +91,18 @@ require("source-map-support").install();
 						const task = module.default;
 
 						let runFunc = () => {
-							console.log("[INFO] Running task " + task.name);
+							if (!task.quiet) console.log("[INFO] Running task " + task.name);
 							let start = new Date().getTime();
 
 							let prom = task.func(client).then(
 								() =>
-									console.log(
-										`[INFO] Task ${task.name} completed and took ${
-											(new Date().getTime() - start) / 1000
-										}s.`
-									),
+									!task.quiet
+										? console.log(
+												`[INFO] Task ${task.name} completed and took ${
+													(new Date().getTime() - start) / 1000
+												}s.`
+										  )
+										: null,
 								(err) =>
 									console.error(
 										`[ERROR] Task ${task.name} failed after ${

@@ -15,14 +15,16 @@ export const verificatorDefaultMessage =
 	"⚠️ By **reacting** to this message below (click the ✅) you're agreeing to the rules you've just read and __***will gain access to the rest of the server***__.";
 
 export class Task {
-	constructor(name: string, frequency: number, func: (client: Commando.CommandoClient) => Promise<any>) {
+	constructor(name: string, frequency: number, quiet: boolean, func: (client: Commando.CommandoClient) => Promise<any>) {
 		this.name = name;
 		this.frequency = frequency;
+		this.quiet = quiet;
 		this.func = func;
 	}
 
 	public name: string;
 	public frequency: number;
+	public quiet: boolean;
 	public func: (client: Commando.CommandoClient) => Promise<any>;
 }
 

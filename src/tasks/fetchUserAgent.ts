@@ -6,6 +6,7 @@ import { Task } from "../util/constants";
 export default new Task(
 	"fetchUserAgent",
 	1000 * 60 * 60 * 24 * 3, // 3 days
+	false,
 	async (client: Commando.CommandoClient) => {
 		// Fetch latest stable Chrome version
 		const response = await axios({
